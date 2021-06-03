@@ -14,7 +14,7 @@ class PostController extends Controller
      */
     public function index()
     {
-        dd('hello');
+        return response()->json(Post::all());
     }
 
     /**
@@ -30,7 +30,7 @@ class PostController extends Controller
             'title' => $request->title,
             'content' => $request->content,
         ];
-        
+
         $post = Post::create($post);
         return response()->json([
             'post_id' => $post->id
@@ -46,7 +46,15 @@ class PostController extends Controller
      */
     public function show($id)
     {
-        //
+        $post = Post::find($id);
+
+        if(!$post) {
+            return response()->json([
+                "message" => "there is no post"
+            ], 404);
+        }
+
+        return response()->json($post);
     }
 
     /**
@@ -58,7 +66,28 @@ class PostController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $post = Post::find($id);
+
+        if(!$post) {
+            return response()->json([
+                "message" => "there is no post"
+            ], 404);
+        }
+
+        if($request->title) {
+            $post->title = $request->title;
+        }
+
+        if($request->content) {
+            $post->content = $request->content;
+        }
+
+        $post->save();
+
+        return response()->json([
+            "message" =>"Successfully update"
+        ], 200);
+
     }
 
     /**
@@ -69,6 +98,18 @@ class PostController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $post = Post::find($id);
+        
+        if(!$post) {
+            return response()->json([
+                "message" => "there is no post"
+            ], 404);
+        }
+
+        Post::destroy($id);
+
+        return response()->json([
+            "message" =>"Successfully removed"
+        ], 200);
     }
 }
