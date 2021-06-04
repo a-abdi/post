@@ -15,7 +15,7 @@ class CreateAuthTokensTable extends Migration
     {
         Schema::create('auth_tokens', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id')->unique();
+            $table->unsignedBigInteger('user_id');
             $table->string('access_token', 64);
             $table->timestamps();
         });
