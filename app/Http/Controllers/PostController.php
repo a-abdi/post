@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Post;
 use Illuminate\Support\Facades\Validator;
-
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+use App\Models\AuthToken;
 
 class PostController extends Controller
 {
@@ -27,7 +29,6 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
-
         $validator = Validator::make($request->all(), [
             'title' => 'required|unique:posts|max:64',
             'content' => 'required',
@@ -39,8 +40,10 @@ class PostController extends Controller
             ], 422);
         }
 
+        $access_token = $request->bearerToken();
+        $user_id = AuthToken::where('access_token', $access_token)->value('user_id');
         $post = [
-            'user_id' => 1,
+            'user_id' => $user_id,
             'title' => $request->title,
             'content' => $request->content,
         ];
@@ -66,7 +69,7 @@ class PostController extends Controller
         if(!$post) {
             return response()->json([
                 "message" => "This Post does not exist, check your details"
-            ], 400);
+            ], 404);
         }
 
         return response()->json($post);
@@ -86,13 +89,12 @@ class PostController extends Controller
         if(!$post) {
             return response()->json([
                 "message" => "This Post does not exist, check your details"
-            ], 400);
+            ], 404);
         }
 
-        
         if($request->title) {
             $validator = Validator::make($request->all(), [
-                'title' => 'unique:posts|max:64',
+                'title' => 'max:64|unique:posts,title,' . $id,
             ]);
             
             if ($validator->fails()) {
@@ -129,7 +131,7 @@ class PostController extends Controller
         if(!$post) {
             return response()->json([
                 "message" => "This Post does not exist, check your details"
-            ], 400);
+            ], 404);
         }
 
         Post::destroy($id);
